@@ -1,5 +1,7 @@
 package com.backend.librarymanagementsystem.Service;
 
+import com.backend.librarymanagementsystem.DTO.BookRequestDto;
+import com.backend.librarymanagementsystem.DTO.BookResponseDto;
 import com.backend.librarymanagementsystem.Entity.Author;
 import com.backend.librarymanagementsystem.Entity.Book;
 import com.backend.librarymanagementsystem.Repository.AuthorRepository;
@@ -17,19 +19,26 @@ public class BookService {
     @Autowired
     AuthorRepository authorRepository;
 
-    public void addBook(Book book) throws Exception {
+    public BookResponseDto addBook(BookRequestDto bookRequestDto){
 
-        Author author;
-        try {
-             author = authorRepository.findById(book.getAuthor().getId()).get();
-        }
-        catch(Exception e){
-            throw new Exception("Author Not Exists");
-        }
+        //get the author object
+       Author author = authorRepository.findById(bookRequestDto.getAuthorId()).get();
 
-        List<Book> booksWritten = author.getBooks();
-         booksWritten.add(book);
+        Book book = new Book();
+        book.setTitle(bookRequestDto.getTitle());
+        book.setPrice(bookRequestDto.getPrice());
+        book.setGenre((bookRequestDto.getGenre()));
+        book.setIssued(false);
+        book.setAuthor(author);
 
+        author.getBooks().add(book);
         authorRepository.save(author);
+
+        //create a response
+        BookResponseDto bookResponseDto = new BookResponseDto();
+        bookResponseDto.setTitle(book.getTitle());
+        bookResponseDto.setPrice(book.getPrice());
+
+        return bookResponseDto;
     }
 }

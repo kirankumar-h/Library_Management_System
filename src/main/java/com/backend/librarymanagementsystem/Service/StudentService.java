@@ -1,5 +1,8 @@
 package com.backend.librarymanagementsystem.Service;
 
+import com.backend.librarymanagementsystem.DTO.StudentRequestDto;
+import com.backend.librarymanagementsystem.DTO.StudentResponseDto;
+import com.backend.librarymanagementsystem.DTO.StudentUpdateEmailRequestDto;
 import com.backend.librarymanagementsystem.Entity.LibraryCard;
 import com.backend.librarymanagementsystem.Entity.Student;
 import com.backend.librarymanagementsystem.Enum.CardStatus;
@@ -13,17 +16,24 @@ import java.util.List;
 public class StudentService {
     @Autowired
     StudentRepository studentRepository;
-    public void addStudent(Student student) {
-        //set the value of card
+    public void addStudent(StudentRequestDto studentRequestDto) {
+
+        //create student objet
+        Student student = new Student();
+        student.setName(studentRequestDto.getName());
+        student.setAge(studentRequestDto.getAge());
+        student.setEmail(studentRequestDto.getEmail());
+        student.setDepartment(studentRequestDto.getDepartment());
+
+        //create a card object
         LibraryCard card = new LibraryCard();
         card.setStatus(CardStatus.ACTIVATED);
-        card.setValidTill("03/2025");
-        card.setStudent(student);
+        card.setStudent(student); //set the value(student_Id) of  foreign key to the card table
 
-        //set the card attribute in student
+        //set card in student
         student.setCard(card);
 
-        studentRepository.save(student);
+        studentRepository.save(student); //will save both student and card
     }
 
     public String findByEmail(String email) {
@@ -32,4 +42,24 @@ public class StudentService {
     }
 
 
+    public StudentResponseDto updateEmail(StudentUpdateEmailRequestDto studentUpdateEmailRequestDto) {
+
+        Student student = studentRepository.findById(studentUpdateEmailRequestDto.getId()).get();
+        student.setEmail(studentUpdateEmailRequestDto.getEmail());
+
+        //update step
+       Student updatedStudent = studentRepository.save(student);
+
+       //convert updated student to Response DTO
+        StudentResponseDto studentResponseDto = new StudentResponseDto();
+        studentResponseDto.setId(updatedStudent.getId());
+        studentResponseDto.setName(updatedStudent.getName());
+        studentResponseDto.setEmail(updatedStudent.getEmail());
+
+        return studentResponseDto;
+    }
+
+    public List<Student> findByAge(int age) {
+       return studentRepository.findByAge(age);
+    }
 }
